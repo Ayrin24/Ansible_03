@@ -171,3 +171,73 @@
         enabled: true
         state: started
         daemon_reload: true
+- name: Install and configure LightHouse
+  hosts: lighthouse
+  become: true
+
+  handlers:
+    - name: Reload nginx
+      ansible.builtin.service:
+        name: nginx
+        state: reloaded
+
+  tasks:
+    - name: Install nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+        update_cache: true
+
+    - name: Create lighthouse directory
+      ansible.builtin.file:
+        path: "{{ lighthouse_install_dir }}"
+        state: directory
+        owner: "{{ lighthouse_user }}"
+        group: "{{ lighthouse_group }}"
+        mode: "0755"
+
+    - name: Download lighthouse archive
+      ansible.builtin.get_url:
+        url: "{{ lighthouse_download_url }}"
+        dest: "/tmp/lighthouse-{{ lighthouse_version }}.tar.gz"
+        mode: "0644"
+      register: lighthouse_download
+
+    - name: Unarchive lighthouse
+      ansible.builtin.unarchive:
+        src: "/tmp/lighthouse-{{ lighthouse_version }}.tar.gz"
+        dest: "{{ lighthouse_install_dir }}"
+        remote_src: true
+        extra_opts:
+          - "--strip-components=1"
+        owner: "{{ lighthouse_user }}"
+        group: "{{ lighthouse_group }}"
+      when: lighthouse_download.changed  # noqa no-handler
+
+    - name: Deploy nginx config for lighthouse
+      ansible.builtin.template:
+        src: lighthouse.conf.j2
+        dest: /etc/nginx/sites-available/lighthouse.conf
+        owner: root
+        group: root
+        mode: "0644"
+      notify: Reload nginx
+
+    - name: Enable lighthouse site
+      ansible.builtin.file:
+        src: /etc/nginx/sites-available/lighthouse.conf
+        dest: /etc/nginx/sites-enabled/lighthouse.conf
+        state: link
+      notify: Reload nginx
+
+    - name: Remove default nginx site
+      ansible.builtin.file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+      notify: Reload nginx
+
+    - name: Enable and start nginx
+      ansible.builtin.service:
+        name: nginx
+        enabled: true
+        state: started

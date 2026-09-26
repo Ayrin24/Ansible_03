@@ -1,0 +1,7 @@
+---
+lighthouse_version: "0.1.0"
+lighthouse_download_url: "https://github.com/VKCOM/lighthouse/archive/refs/heads/master.tar.gz"
+lighthouse_install_dir: "/var/www/lighthouse"
+lighthouse_user: "www-data"
+lighthouse_group: "www-data"
+nginx_listen_port: 80
