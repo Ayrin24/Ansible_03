@@ -50,7 +50,77 @@ playbook/
 └── README.md
 ````
 
+Параметры (переменные):
 
+ClickHouse — group_vars/clickhouse/vars.yml
+
+Переменная	Значение по умолчанию	Описание
+````
+clickhouse_version	22.3.3.44	Версия ClickHouse
+
+clickhouse_deb_base_url	https://packages.clickhouse.com/deb/pool/main/c	Базовый URL для скачивания .deb
+
+clickhouse_deb_arch	amd64	Архитектура для clickhouse-common-static
+
+clickhouse_packages	clickhouse-client, clickhouse-server, clickhouse-common-static	Список пакетов
+````
+
+Vector — group_vars/vector/vars.yml
+
+Переменная	Значение по умолчанию	Описание
+````
+vector_version	0.42.0	Версия Vector
+
+vector_arch	x86_64-unknown-linux-gnu	Архитектура сборки
+
+vector_download_dir	/tmp/vector-download	Каталог для скачивания архива
+
+vector_install_dir	/opt/vector	Каталог установки
+
+vector_config_dir	/etc/vector	Каталог конфигурации
+
+vector_data_dir	/var/lib/vector	Каталог данных
+
+vector_user	vector	Системный пользователь
+
+vector_group	vector	Системная группа
+````
+
+LightHouse — group_vars/lighthouse/vars.yml
+
+Переменная	Значение по умолчанию	Описание
+````
+lighthouse_version	0.1.0	Версия LightHouse
+
+lighthouse_download_url	https://github.com/VKCOM/lighthouse/archive/refs/heads/master.tar.gz	URL архива со статикой
+
+lighthouse_install_dir	/var/www/lighthouse	Каталог для статики LightHouse
+
+lighthouse_user	www-data	Владелец файлов
+
+lighthouse_group	www-data	Группа файлов
+
+nginx_listen_port	80	Порт, который слушает Nginx
+````
+
+Теги
+
+
+Теги в playbook не используются. Для выборочного запуска
+применяется флаг --limit:
+
+````
+# Только ClickHouse
+ansible-playbook site.yml --limit clickhouse --diff
+
+# Только Vector
+ansible-playbook site.yml --limit vector --diff
+
+# Только LightHouse
+ansible-playbook site.yml --limit lighthouse --diff
+````
+
+Результат:
 
 Запустите ansible-lint site.yml и исправьте ошибки, если они есть.
 
